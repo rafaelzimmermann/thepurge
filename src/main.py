@@ -1,11 +1,14 @@
 import os
 import sys
-import questionary
 
-from models import Directory, File
-from service import print_duplicates, move_duplicates, delete_duplicates
+import questionary
+import typer
 from rich.console import Console
 from rich.progress import Progress
+from typing_extensions import Annotated
+
+from models import Directory, File
+from service import delete_duplicates, move_duplicates, print_duplicates
 
 strategies = ["MOVE", "PRINT", "DELETE"]
 
@@ -23,7 +26,7 @@ def load_checksum_files(
     return checksum_files
 
 
-def main(folder_path: str = ".", extensions: set[str] = None):
+def the_purge(folder_path: str = ".", extensions: set[str] = None):
     selected_strategy = questionary.select(
         "Select a strategy for handling duplicate files:",
         choices=strategies,
@@ -34,7 +37,7 @@ def main(folder_path: str = ".", extensions: set[str] = None):
         sys.exit(1)
 
     with Progress() as progress:
-        dir = Directory(folder_path, progress=progress, files_extenssions=extensions)
+        dir = Directory(folder_path, progress=progress, files_extensions=extensions)
     dir.print(console=Console())
 
     checksum_files = load_checksum_files(dir)
@@ -53,9 +56,20 @@ def main(folder_path: str = ".", extensions: set[str] = None):
         sys.exit(1)
 
 
-if __name__ == "__main__":
-    import sys
+def main(
+    folder_path: Annotated[
+        str, typer.Argument(help="The folder to performe duplicated purge")
+    ] = ".",
+    extensions: Annotated[
+        str,
+        typer.Argument(
+            help="Only target files with provided extensions. Example: jpg,png,gif"
+        ),
+    ] = None,
+):
+    extensions = extensions.split(",") if extensions is not None else []
+    the_purge(folder_path=folder_path, extensions=set(extensions))
 
-    folder_path = sys.argv[1] if len(sys.argv) > 1 else "."
-    extensions = sys.argv[2].split(",") if len(sys.argv) > 2 else None
-    main(folder_path=folder_path, extensions=extensions)
+
+if __name__ == "__main__":
+    typer.run(main)

@@ -76,7 +76,11 @@ class Directory(object):
             if entry in ignored:
                 continue
             is_file = os.path.isfile(os.path.join(self.path, entry))
-            if len(self.files_extensions) > 0 and is_file and entry.split(".")[-1].lower() not in self.files_extensions:
+            if (
+                len(self.files_extensions) > 0
+                and is_file
+                and entry.split(".")[-1].lower() not in self.files_extensions
+            ):
                 console.print(
                     f"[bold yellow]Skipping {entry} as it does not match the specified extensions.[/bold yellow]"
                 )
@@ -92,7 +96,13 @@ class Directory(object):
                     File(file_path=full_path, size=size, file_type=file_type)
                 )
             else:
-                self.dirs.append(Directory(path=full_path, progress=self.progress, files_extensions=self.files_extensions))
+                self.dirs.append(
+                    Directory(
+                        path=full_path,
+                        progress=self.progress,
+                        files_extensions=self.files_extensions,
+                    )
+                )
 
     def print(self, indent=0, console: Console = Console()):
         """Print directory details."""
