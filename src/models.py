@@ -21,17 +21,21 @@ class File(object):
         self.size = size
         self.file_type = file_type
         self.quick_check_sum = self._quick_check_sum()
+        self.full_check_sum = None
 
     def __repr__(self):
         return f"File(name={self.name}, size={self.size}, file_type={self.file_type})"
 
     def full_check_sum(self):
         """Calculate the full checksum of the file."""
+        if self.full_check_sum is not None:
+            return self.full_check_sum
         hasher = hashlib.md5()
         with open(self.name, "rb") as f:
             while chunk := f.read(8192):
                 hasher.update(chunk)
-        return hasher.hexdigest()
+        self.full_check_sum = hasher.hexdigest()
+        return self.full_check_sum
 
     def _quick_check_sum(self):
         hasher = hashlib.md5()
