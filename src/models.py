@@ -16,7 +16,7 @@ print(f"Ignored files: {ignored}")
 
 class File(object):
     def __init__(self, file_path, size, file_type):
-        self.file_path = file_path
+        self.path = file_path
         self.name = file_path.split("/")[-1]
         self.size = size
         self.file_type = file_type
@@ -35,7 +35,7 @@ class File(object):
 
     def _quick_check_sum(self):
         hasher = hashlib.md5()
-        with open(self.file_path, "rb") as f:
+        with open(self.path, "rb") as f:
             # Read the first 1024 bytes for a quick checksum
             data = f.read(1024)
             hasher.update(data)

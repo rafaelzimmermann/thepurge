@@ -9,6 +9,4 @@
   Reclaim space and keep your folders clean with ease.
 </p>
 
----
-
 ⚠️ **The Purge is a work in progress**
