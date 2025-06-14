@@ -23,7 +23,7 @@ def load_checksum_files(
     return checksum_files
 
 
-def main(folder_path: str = "."):
+def main(folder_path: str = ".", extensions: set[str] = None):
     selected_strategy = questionary.select(
         "Select a strategy for handling duplicate files:",
         choices=strategies,
@@ -34,7 +34,7 @@ def main(folder_path: str = "."):
         sys.exit(1)
 
     with Progress() as progress:
-        dir = Directory(folder_path, progress=progress)
+        dir = Directory(folder_path, progress=progress, files_extenssions=extensions)
     dir.print(console=Console())
 
     checksum_files = load_checksum_files(dir)
@@ -57,4 +57,5 @@ if __name__ == "__main__":
     import sys
 
     folder_path = sys.argv[1] if len(sys.argv) > 1 else "."
-    main(folder_path=folder_path)
+    extensions = sys.argv[2].split(",") if len(sys.argv) > 2 else None
+    main(folder_path=folder_path, extensions=extensions)

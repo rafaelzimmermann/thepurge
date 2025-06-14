@@ -54,11 +54,14 @@ class File(object):
 
 
 class Directory(object):
-    def __init__(self, path, progress=None):
+    def __init__(
+        self, path, progress: Progress = None, files_extensions: set[str] = None
+    ):
         self.path = path
         self.name = path.split("/")[-1]
         self.files = []
         self.dirs = []
+        self.files_extensions = files_extensions if files_extensions else set([])
         self.progress = progress if progress else None
         tasks = self.progress.tasks
         if len(tasks) == 0:
@@ -72,17 +75,24 @@ class Directory(object):
                 self.progress.advance(0)
             if entry in ignored:
                 continue
+            is_file = os.path.isfile(os.path.join(self.path, entry))
+            if len(self.files_extensions) > 0 and is_file and entry.split(".")[-1].lower() not in self.files_extensions:
+                console.print(
+                    f"[bold yellow]Skipping {entry} as it does not match the specified extensions.[/bold yellow]"
+                )
+                continue
+
             self.progress.console.print(f"Processing entry: {self.path}/{entry}")
 
             full_path = os.path.join(self.path, entry)
-            if os.path.isfile(full_path):
+            if is_file:
                 size = os.path.getsize(full_path)
                 file_type = entry.split(".")[-1] if "." in entry else "unknown"
                 self.files.append(
                     File(file_path=full_path, size=size, file_type=file_type)
                 )
             else:
-                self.dirs.append(Directory(path=full_path, progress=self.progress))
+                self.dirs.append(Directory(path=full_path, progress=self.progress, files_extensions=self.files_extensions))
 
     def print(self, indent=0, console: Console = Console()):
         """Print directory details."""
