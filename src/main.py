@@ -5,12 +5,16 @@ import questionary
 import typer
 from rich.console import Console
 from rich.progress import Progress
+from rich.prompt import Confirm
 from typing_extensions import Annotated
 
 from models import Directory, File
 from service import delete_duplicates, move_duplicates, print_duplicates
 
-strategies = ["MOVE", "PRINT", "DELETE"]
+MOVE = "MOVE"
+PRINT = "PRINT"
+DELETE = "DELETE"
+strategies = [MOVE, PRINT, DELETE]
 
 
 def load_checksum_files(
@@ -30,7 +34,7 @@ def the_purge(folder_path: str = ".", extensions: set[str] = None):
     selected_strategy = questionary.select(
         "Select a strategy for handling duplicate files:",
         choices=strategies,
-        default="MOVE",
+        default=PRINT,
     ).ask()
     if selected_strategy not in strategies:
         print(f"Invalid strategy selected: {selected_strategy}")
@@ -43,16 +47,13 @@ def the_purge(folder_path: str = ".", extensions: set[str] = None):
     checksum_files = load_checksum_files(dir)
     console = Console()
 
-    if selected_strategy == "MOVE":
+    if selected_strategy == MOVE and Confirm.ask("Do you want to move duplicates?"):
         move_duplicates(checksum_files, console)
-    elif selected_strategy == "PRINT":
+    elif selected_strategy == PRINT:
         print_duplicates(checksum_files, console)
-    elif selected_strategy == "DELETE":
+    elif selected_strategy == DELETE and Confirm.ask("Do you want to delete duplicates?"):
         delete_duplicates(checksum_files, console)
     else:
-        console.print(
-            f"[bold red]Unknown strategy selected: {selected_strategy}[/bold red]"
-        )
         sys.exit(1)
 
 
