@@ -66,7 +66,7 @@ class Directory(object):
         tasks = self.progress.tasks
         if len(tasks) == 0:
             self.progress.add_task("Loading directory tree", total=None)
-        self._load_files()
+        self._load_files(progress.console if self.progress else Console())
 
     def _load_files(self, console: Console = Console()):
         """Load files from the directory."""
@@ -86,15 +86,21 @@ class Directory(object):
                 )
                 continue
 
-            self.progress.console.print(f"Processing entry: {self.path}/{entry}")
+            self.progress.console.print(f"[dim grey]Processing entry: {entry}[/dim grey]")
 
             full_path = os.path.join(self.path, entry)
             if is_file:
-                size = os.path.getsize(full_path)
-                file_type = entry.split(".")[-1] if "." in entry else "unknown"
-                self.files.append(
-                    File(file_path=full_path, size=size, file_type=file_type)
-                )
+                try:
+                    size = os.path.getsize(full_path)
+                    file_type = entry.split(".")[-1] if "." in entry else "unknown"
+                    self.files.append(
+                        File(file_path=full_path, size=size, file_type=file_type)
+                    )
+                except OSError as e:
+                    console.print(
+                        f"[bold red]Error reading file {full_path}: {e}[/bold red]"
+                    )
+                    continue
             else:
                 self.dirs.append(
                     Directory(
