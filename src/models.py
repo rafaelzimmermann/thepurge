@@ -1,8 +1,8 @@
 import hashlib
 import os
 
-from rich.console import Console
-from rich.progress import Progress
+from multiprocessing import Pool
+
 
 ignored = []
 
@@ -45,34 +45,42 @@ class File(object):
             hasher.update(data)
         return hasher.hexdigest()
 
-    def print(self, indent=0, console: Console = Console()):
+    def print(self, indent=0):
         """Print file details."""
         indent_str = " " * indent
-        console.print(
+        print(
             f"{indent_str}- [bold yellow]{self.name}[/bold yellow], Size: {self.size}, Quick Checksum: {self.quick_check_sum}"
         )
 
 
 class Directory(object):
-    def __init__(
-        self, path, progress: Progress = None, files_extensions: set[str] = None
-    ):
+    def __init__(self, path, files_extensions: set[str] = None):
         self.path = path
         self.name = path.split("/")[-1]
         self.files = []
         self.dirs = []
         self.files_extensions = files_extensions if files_extensions else set([])
-        self.progress = progress if progress else None
-        tasks = self.progress.tasks
-        if len(tasks) == 0:
-            self.progress.add_task("Loading directory tree", total=None)
-        self._load_files(progress.console if self.progress else Console())
+        self._load_files()
 
-    def _load_files(self, console: Console = Console()):
+    @staticmethod
+    def _load_file(full_path: str, entry: str) -> File | None:
+        try:
+            size = os.path.getsize(full_path)
+            file_type = entry.split(".")[-1] if "." in entry else "unknown"
+            return File(file_path=full_path, size=size, file_type=file_type)
+        except OSError as e:
+            print(f"Error reading file {full_path}: {e}")
+            return None
+
+    @staticmethod
+    def _load_dir(full_path: str, entry: str, files_extensions: set[str] = None):
+        return Directory(path=full_path, files_extensions=files_extensions)
+
+    def _load_files(self):
         """Load files from the directory."""
+        files = []
+        dirs = []
         for entry in os.listdir(self.path):
-            if self.progress:
-                self.progress.advance(0)
             if entry in ignored:
                 continue
             is_file = os.path.isfile(os.path.join(self.path, entry))
@@ -81,43 +89,30 @@ class Directory(object):
                 and is_file
                 and entry.split(".")[-1].lower() not in self.files_extensions
             ):
-                console.print(
-                    f"[bold yellow]Skipping {entry} as it does not match the specified extensions.[/bold yellow]"
+                print(
+                    f"Skipping {entry} as it does not match the specified extensions."
                 )
                 continue
 
-            self.progress.console.print(f"[dim grey]Processing entry: {entry}[/dim grey]")
+            print(f"Processing entry: {entry}")
 
             full_path = os.path.join(self.path, entry)
             if is_file:
-                try:
-                    size = os.path.getsize(full_path)
-                    file_type = entry.split(".")[-1] if "." in entry else "unknown"
-                    self.files.append(
-                        File(file_path=full_path, size=size, file_type=file_type)
-                    )
-                except OSError as e:
-                    console.print(
-                        f"[bold red]Error reading file {full_path}: {e}[/bold red]"
-                    )
-                    continue
+                files.append((full_path, entry))
             else:
-                self.dirs.append(
-                    Directory(
-                        path=full_path,
-                        progress=self.progress,
-                        files_extensions=self.files_extensions,
-                    )
-                )
+                dirs.append((full_path, entry, self.files_extensions))
+        with Pool() as pool:
+            self.files = pool.starmap(self._load_file, files)
+        self.dirs = [self._load_dir(*params) for params in dirs]
 
-    def print(self, indent=0, console: Console = Console()):
+    def print(self, indent: int = 0):
         """Print directory details."""
         if self.name in ignored:
             return
 
         indent_str = " " * indent
-        console.print(f"{indent_str}[bold cyan]{self.path}[/bold cyan]")
+        print(f"{indent_str}{self.path}")
         for file in self.files:
-            file.print(indent + 2, console=console)
+            file.print(indent + 2)
         for dir in self.dirs:
-            dir.print(indent + 2, console=console)
+            dir.print(indent + 2)

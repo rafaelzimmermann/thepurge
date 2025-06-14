@@ -14,7 +14,7 @@ from service import delete_duplicates, move_duplicates, print_duplicates
 MOVE = "MOVE"
 PRINT = "PRINT"
 DELETE = "DELETE"
-strategies = [MOVE, PRINT, DELETE]
+strategies = [PRINT, MOVE, DELETE]
 
 
 def load_checksum_files(
@@ -41,8 +41,8 @@ def the_purge(folder_path: str = ".", extensions: set[str] = None):
         sys.exit(1)
 
     with Progress() as progress:
-        dir = Directory(folder_path, progress=progress, files_extensions=extensions)
-    dir.print(console=Console())
+        dir = Directory(folder_path, files_extensions=extensions)
+    dir.print()
 
     checksum_files = load_checksum_files(dir)
     console = Console()
@@ -51,7 +51,9 @@ def the_purge(folder_path: str = ".", extensions: set[str] = None):
         move_duplicates(checksum_files, console)
     elif selected_strategy == PRINT:
         print_duplicates(checksum_files, console)
-    elif selected_strategy == DELETE and Confirm.ask("Do you want to delete duplicates?"):
+    elif selected_strategy == DELETE and Confirm.ask(
+        "Do you want to delete duplicates?"
+    ):
         delete_duplicates(checksum_files, console)
     else:
         sys.exit(1)
