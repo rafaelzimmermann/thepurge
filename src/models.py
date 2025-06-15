@@ -94,7 +94,7 @@ class Directory(object):
                 )
                 continue
 
-            print(f"Processing entry: {entry}")
+            print(f"Processing entry: {self.path}{entry}")
 
             full_path = os.path.join(self.path, entry)
             if is_file:

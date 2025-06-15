@@ -9,4 +9,39 @@
   Reclaim space and keep your folders clean with ease.
 </p>
 
+---
+
+### Examples
+
+#### Remove duplicate photos and videos
+
+To purge duplicate image and video files from a specific folder, run:
+
+```sh
+thepurge ./path/to/files jpg,jpeg,gif,heic,png,tiff,bmp,raw,webp,mov,mp4,mpeg,avi,wmv,flv,mkv
+
+```
+
+This will scan the `./path/to/files` directory for duplicate files with the specified extensions and remove redundant copies.
+
+#### Remove duplicate documents
+
+For cleaning up duplicate documents (e.g., PDFs and text files):
+
+```sh
+thepurge ./documents pdf,docx,doc,txt
+```
+
+#### Target all files in a folder
+
+If you want to remove duplicates without filtering by extension:
+
+```sh
+thepurge ./downloads
+```
+
+
+
+
+
 ⚠️ **The Purge is a work in progress**

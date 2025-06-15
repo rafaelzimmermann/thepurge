@@ -11,4 +11,4 @@ dependencies = [
 ]
 
 [project.scripts]
-the-purge = "src.main:main"
+the-purge = "src.thepurge:main"
