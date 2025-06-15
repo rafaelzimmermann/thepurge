@@ -9,7 +9,8 @@ from rich.prompt import Confirm
 from typing_extensions import Annotated
 
 from models import Directory, File
-from service import delete_duplicates, move_duplicates, print_duplicates
+from services.dedup import delete_duplicates, move_duplicates, print_duplicates
+from services.treeloader import build_tree
 
 MOVE = "MOVE"
 PRINT = "PRINT"
@@ -40,8 +41,7 @@ def the_purge(folder_path: str = ".", extensions: set[str] = None):
         print(f"Invalid strategy selected: {selected_strategy}")
         sys.exit(1)
 
-    with Progress() as progress:
-        dir = Directory(folder_path, files_extensions=extensions)
+    dir = build_tree(Directory(folder_path, files_extensions=extensions))
     dir.print()
 
     checksum_files = load_checksum_files(dir)

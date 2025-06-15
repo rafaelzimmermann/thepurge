@@ -4,16 +4,6 @@ import os
 from multiprocessing import Pool
 
 
-ignored = []
-
-with open(".thepurgeignore", "r") as f:
-    for line in f:
-        line = line.strip()
-        if line and not line.startswith("#"):
-            ignored.append(line)
-print(f"Ignored files: {ignored}")
-
-
 class File(object):
     def __init__(self, file_path, size, file_type):
         self.path = file_path
@@ -60,56 +50,9 @@ class Directory(object):
         self.files = []
         self.dirs = []
         self.files_extensions = files_extensions if files_extensions else set([])
-        self._load_files()
-
-    @staticmethod
-    def _load_file(full_path: str, entry: str) -> File | None:
-        try:
-            size = os.path.getsize(full_path)
-            file_type = entry.split(".")[-1] if "." in entry else "unknown"
-            return File(file_path=full_path, size=size, file_type=file_type)
-        except OSError as e:
-            print(f"Error reading file {full_path}: {e}")
-            return None
-
-    @staticmethod
-    def _load_dir(full_path: str, entry: str, files_extensions: set[str] = None):
-        return Directory(path=full_path, files_extensions=files_extensions)
-
-    def _load_files(self):
-        """Load files from the directory."""
-        files = []
-        dirs = []
-        for entry in os.listdir(self.path):
-            if entry in ignored:
-                continue
-            is_file = os.path.isfile(os.path.join(self.path, entry))
-            if (
-                len(self.files_extensions) > 0
-                and is_file
-                and entry.split(".")[-1].lower() not in self.files_extensions
-            ):
-                print(
-                    f"Skipping {entry} as it does not match the specified extensions."
-                )
-                continue
-
-            print(f"Processing entry: {self.path}{entry}")
-
-            full_path = os.path.join(self.path, entry)
-            if is_file:
-                files.append((full_path, entry))
-            else:
-                dirs.append((full_path, entry, self.files_extensions))
-        with Pool() as pool:
-            self.files = pool.starmap(self._load_file, files)
-        self.dirs = [self._load_dir(*params) for params in dirs]
 
     def print(self, indent: int = 0):
         """Print directory details."""
-        if self.name in ignored:
-            return
-
         indent_str = " " * indent
         print(f"{indent_str}{self.path}")
         for file in self.files:
