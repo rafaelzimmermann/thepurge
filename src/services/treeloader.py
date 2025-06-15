@@ -36,12 +36,14 @@ def _file_extension(filename: str) -> str | None:
     """Get the file extension."""
     return filename.split(".")[-1].lower() if "." in filename else None
 
+
 def _skip_file(entry: str, files_extensions: set[str]) -> bool:
     """Check if the file should be skipped based on its extension."""
     if not files_extensions:
         return False
     ext = _file_extension(entry)
     return ext is None or ext not in files_extensions
+
 
 def build_tree(directory: Directory) -> Directory:
     """Load files from the directory."""
@@ -56,12 +58,12 @@ def build_tree(directory: Directory) -> Directory:
             if _skip_file(entry, directory.files_extensions):
                 print(f"Skipping {entry}")
                 continue
-           
+
             print(f"Processing entry: {full_path}")
             files.append((full_path, entry))
         else:
             dirs.append(Directory(full_path, directory.files_extensions))
-    with Pool() as pool:
+    with Pool(processes=os.cpu_count() * 2) as pool:
         directory.files = pool.starmap(_load_file, files)
     directory.dirs = [build_tree(dir) for dir in dirs]
     return directory
