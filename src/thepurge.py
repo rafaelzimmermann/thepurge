@@ -42,7 +42,7 @@ def the_purge(folder_path: str = ".", extensions: set[str] = None):
         sys.exit(1)
 
     dir = build_tree(Directory(folder_path, files_extensions=extensions))
-    dir.print()
+    dir.print(console=Console())
 
     checksum_files = load_checksum_files(dir)
     console = Console()
