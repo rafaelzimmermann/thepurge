@@ -6,10 +6,17 @@ from multiprocessing import Pool
 
 def checksum_file(file_path: str) -> str:
     hasher = hashlib.md5()
+    max_chunks = 5242880 
+    total = 0
     with open(file_path, "rb") as f:
         while chunk := f.read(1024):
+            total += 1024
             hasher.update(chunk)
-    return hasher.hexdigest()
+            if total > max_chunks:
+                break
+    result = hasher.hexdigest()
+    print(f"Checksum for {file_path} is {result}")
+    return result
 
 class File(object):
     def __init__(self, file_path, size, file_type):
@@ -60,3 +67,9 @@ class Directory(object):
             file.print(indent + 2, console=console)
         for dir in self.dirs:
             dir.print(indent + 2, console=console)
+
+    def recursive_list(self, files: list[File] = []) -> list[File]:
+        files.extend(self.files)
+        for dir in self.dirs:
+            dir.recursive_list(files)
+        return files

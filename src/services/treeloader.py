@@ -23,10 +23,6 @@ def _load_file(full_path: str, entry: str) -> File | None:
         return None
 
 
-def _load_dir(full_path: str, entry: str, files_extensions: set[str] = None):
-    return Directory(path=full_path, files_extensions=files_extensions)
-
-
 def _ignored_file(entry: str) -> bool:
     """Check if the file should be ignored."""
     return entry in ignored
