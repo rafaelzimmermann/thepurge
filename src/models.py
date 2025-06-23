@@ -4,6 +4,14 @@ import os
 from rich.console import Console
 from multiprocessing import Pool
 
+def sizeof_fmt(num, suffix="B"):
+    for unit in ("", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"):
+        if abs(num) < 1024.0:
+            return f"{num:3.1f}{unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f}Yi{suffix}"
+
+
 def get_block_size(path):
     stat = os.statvfs(path)
     return stat.f_bsize
@@ -11,9 +19,10 @@ def get_block_size(path):
 def checksum_file(file_path: str) -> str:
     hasher = hashlib.md5()
     block_size = get_block_size(file_path)
+    buffer_size = block_size * 1024
     size = os.path.getsize(file_path)
     
-    print(f"Calculating checksum {file_path} (block size: {block_size})")
+    print(f"Calculating checksum {file_path} (block size: {block_size}), file size: {sizeof_fmt(size)}")
 
     read_pattern = [True]
     if size > 100 * block_size:
@@ -26,12 +35,12 @@ def checksum_file(file_path: str) -> str:
         while pos < size:
             index = (index + 1) % len(read_pattern)
             if read_pattern[index]:
-                chunk = f.read(block_size)
+                chunk = f.read(buffer_size)
                 hasher.update(chunk)
                 pos += len(chunk)
             else:
-                f.seek(block_size, os.SEEK_CUR)
-                pos += block_size
+                f.seek(buffer_size, os.SEEK_CUR)
+                pos += buffer_size
 
     return hasher.hexdigest()
 

@@ -18,21 +18,30 @@ def print_duplicates(
                 console.print(f"  - {file.path}")
     console.print("[bold green]Checksum analysis complete.[/bold green]")
 
+def write_to_csv(
+    checksum_files: dict[str, list[File]], console: Console = Console()
+):
+    with open("duplicates.csv", "w") as _out:
+        _out.write("checksum,path,size\n")
+        for checksum, files in checksum_files.items():
+            if len(files) <= 1:
+                continue
+            for file in files:
+                _out.write(f"{checksum},\"{file.path}\",{file.size}\n")
+    
 
 class Deduplicator:
 
-    def __init__(self, files: list[File], strategy: Callable[[dict[str, list[File]]], bool] = print_duplicates, console: Console = Console()):
+    def __init__(self, files: list[File], processes: int = 1, strategy: Callable[[dict[str, list[File]]], bool] = print_duplicates, console: Console = Console()):
         self.console = console
         self.files = files
+        self.processes = processes
         self.checksum_files = self._checksums()
         self.strategy = strategy
-    
+
     def _checksums(self) -> list[str]:
         files = [file.path for file in self.files]
-        # Reading magnetic disk, less processes avoid random access
-        # and speeds up the process. Probably should make this configurable
-        # or auto scalable.
-        with Pool(processes=3) as pool:
+        with Pool(processes=self.processes) as pool:
             return pool.map(checksum_file, files)
 
     def deduplicate(self) -> bool:
