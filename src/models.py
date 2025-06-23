@@ -4,19 +4,36 @@ import os
 from rich.console import Console
 from multiprocessing import Pool
 
+def get_block_size(path):
+    stat = os.statvfs(path)
+    return stat.f_bsize
+
 def checksum_file(file_path: str) -> str:
     hasher = hashlib.md5()
-    max_chunks = 5242880 
-    total = 0
+    block_size = get_block_size(file_path)
+    size = os.path.getsize(file_path)
+    
+    print(f"Calculating checksum {file_path} (block size: {block_size})")
+
+    read_pattern = [True]
+    if size > 100 * block_size:
+        read_pattern = [True, False, False]
+    
     with open(file_path, "rb") as f:
-        while chunk := f.read(1024):
-            total += 1024
-            hasher.update(chunk)
-            if total > max_chunks:
-                break
-    result = hasher.hexdigest()
-    print(f"Checksum for {file_path} is {result}")
-    return result
+        pos = 0
+        read_pattern = [True, False, False]
+        index = -1
+        while pos < size:
+            index = (index + 1) % len(read_pattern)
+            if read_pattern[index]:
+                chunk = f.read(block_size)
+                hasher.update(chunk)
+                pos += len(chunk)
+            else:
+                f.seek(block_size, os.SEEK_CUR)
+                pos += block_size
+
+    return hasher.hexdigest()
 
 class File(object):
     def __init__(self, file_path, size, file_type):
@@ -73,3 +90,11 @@ class Directory(object):
         for dir in self.dirs:
             dir.recursive_list(files)
         return files
+
+
+if __name__ == "__main__":
+    import sys
+
+    files = sys.argv[1:]
+    for file in files:
+        print(checksum_file(file))

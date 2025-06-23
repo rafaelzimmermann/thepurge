@@ -29,7 +29,10 @@ class Deduplicator:
     
     def _checksums(self) -> list[str]:
         files = [file.path for file in self.files]
-        with Pool(processes=os.cpu_count() * 2) as pool:
+        # Reading magnetic disk, less processes avoid random access
+        # and speeds up the process. Probably should make this configurable
+        # or auto scalable.
+        with Pool(processes=3) as pool:
             return pool.map(checksum_file, files)
 
     def deduplicate(self) -> bool:
