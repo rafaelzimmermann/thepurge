@@ -11,34 +11,38 @@
 
 ---
 
-### Examples
+### Usage
+
+```
+ Usage: thepurge.py [OPTIONS] [FOLDER_PATH] [EXTENSIONS]
+
+╭─ Arguments ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│   folder_path      [FOLDER_PATH]  The folder to performe duplicated purge [default: .]                                                 │
+│   extensions       [EXTENSIONS]   Only target files with provided extensions. Example: jpg,png,gif [default: None]                     │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --strategy         TEXT     Deduplicate strategy. print, csv. [default: PRINT]                                                         │
+│ --processes        INTEGER  Number of processes. [default: 1]                                                                          │
+│ --help                      Show this message and exit.                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+```
+
+### Example
 
 #### Remove duplicate photos and videos
 
 To purge duplicate image and video files from a specific folder, run:
 
 ```sh
-thepurge ./path/to/files jpg,jpeg,gif,heic,png,tiff,bmp,raw,webp,mov,mp4,mpeg,avi,wmv,flv,mkv
-
+thepurge ./path/to/files \
+  jpg,jpeg,gif,heic,png,tiff,bmp,raw,webp,mov,mp4,mpeg,avi,wmv,flv,mkv,cr2 \
+  --strategy=csv \
+  --processes=1
 ```
 
 This will scan the `./path/to/files` directory for duplicate files with the specified extensions and remove redundant copies.
 
-#### Remove duplicate documents
-
-For cleaning up duplicate documents (e.g., PDFs and text files):
-
-```sh
-thepurge ./documents pdf,docx,doc,txt
-```
-
-#### Target all files in a folder
-
-If you want to remove duplicates without filtering by extension:
-
-```sh
-thepurge ./downloads
-```
 
 
 
