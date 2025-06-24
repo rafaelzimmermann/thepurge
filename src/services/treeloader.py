@@ -45,7 +45,7 @@ def build_tree(directory: Directory) -> Directory:
     """Load files from the directory."""
     files = []
     dirs = []
-    for entry in os.listdir(directory.path):
+    for entry in sorted(os.listdir(directory.path)):
         if _ignored_file(entry):
             continue
         full_path = os.path.join(directory.path, entry)
