@@ -48,4 +48,4 @@ This will scan the `./path/to/files` directory for duplicate files with the spec
 
 
 
-⚠️ **The Purge is a work in progress**
+⚠️ **The Purge is a work in progress and does not have a single unit test, so consider using something else.**
