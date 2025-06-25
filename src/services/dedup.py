@@ -18,17 +18,17 @@ def print_duplicates(
                 console.print(f"  - {file.path}")
     console.print("[bold green]Checksum analysis complete.[/bold green]")
 
-def write_to_csv(
-    checksum_files: dict[str, list[File]], console: Console = Console()
-):
+
+def write_to_csv(checksum_files: dict[str, list[File]], console: Console = Console()):
     with open("duplicates.csv", "w") as _out:
         _out.write("checksum,path,size\n")
         for checksum, files in checksum_files.items():
             if len(files) <= 1:
                 continue
             for file in files:
-                _out.write(f"{checksum},\"{file.path}\",{file.size}\n")
-    
+                _out.write(f'{checksum},"{file.path}",{file.size}\n')
+
+
 def move_duplicates(target_dir):
     def move_func(checksum_files: dict[str, list[File]], console: Console = Console()):
         for checksum, files in checksum_files.items():
@@ -48,11 +48,19 @@ def move_duplicates(target_dir):
                 console.print(f"[bold red]Moving {_f.path} -> {new_path}[/bold red]")
                 os.rename(_f.path, new_path)
                 index += 1
+
     return move_func
+
 
 class Deduplicator:
 
-    def __init__(self, files: list[File], processes: int = 1, strategy: Callable[[dict[str, list[File]]], bool] = print_duplicates, console: Console = Console()):
+    def __init__(
+        self,
+        files: list[File],
+        processes: int = 1,
+        strategy: Callable[[dict[str, list[File]]], bool] = print_duplicates,
+        console: Console = Console(),
+    ):
         self.console = console
         self.files = files
         self.processes = processes
