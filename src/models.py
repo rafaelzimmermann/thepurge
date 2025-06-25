@@ -23,24 +23,12 @@ def checksum_file(file_path: str) -> str:
     size = os.path.getsize(file_path)
     
     print(f"Calculating checksum {file_path} (block size: {block_size}), file size: {sizeof_fmt(size)}")
-
-    read_pattern = [True]
-    if size > 100 * block_size:
-        read_pattern = [True, False, False]
-    
     with open(file_path, "rb") as f:
         pos = 0
-        read_pattern = [True, False, False]
-        index = -1
         while pos < size:
-            index = (index + 1) % len(read_pattern)
-            if read_pattern[index]:
-                chunk = f.read(buffer_size)
-                hasher.update(chunk)
-                pos += len(chunk)
-            else:
-                f.seek(buffer_size, os.SEEK_CUR)
-                pos += buffer_size
+            chunk = f.read(buffer_size)
+            hasher.update(chunk)
+            pos += len(chunk)
 
     return hasher.hexdigest()
 

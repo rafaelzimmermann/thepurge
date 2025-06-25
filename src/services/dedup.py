@@ -29,6 +29,26 @@ def write_to_csv(
             for file in files:
                 _out.write(f"{checksum},\"{file.path}\",{file.size}\n")
     
+def move_duplicates(target_dir):
+    def move_func(checksum_files: dict[str, list[File]], console: Console = Console()):
+        for checksum, files in checksum_files.items():
+            if len(files) <= 1:
+                continue
+            for _f in files:
+                if not os.path.exists(_f.path):
+                    console.print(f"[bold red]Skipping due to missing file: {_f.path}")
+                    continue
+            keep = files[:1][0]
+            console.print(f"[bold green]Keeping: {keep.path}[/bold green]")
+            move = files[1:]
+            index = 0
+            for _f in move:
+                new_file_name = f"{checksum}_{index}_{_f.name}"
+                new_path = os.path.join(target_dir, new_file_name)
+                console.print(f"[bold red]Moving {_f.path} -> {new_path}[/bold red]")
+                os.rename(_f.path, new_path)
+                index += 1
+    return move_func
 
 class Deduplicator:
 
