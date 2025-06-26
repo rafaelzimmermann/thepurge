@@ -21,7 +21,7 @@
 │   extensions       [EXTENSIONS]   Only target files with provided extensions. Example: jpg,png,gif [default: None]                     │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --strategy         TEXT     Deduplicate strategy. print, csv. [default: PRINT]                                                         │
+│ --strategy         TEXT     Deduplicate strategy. print, csv, move. [default: PRINT]                                                   │
 │ --processes        INTEGER  Number of processes. [default: 1]                                                                          │
 │ --help                      Show this message and exit.                                                                                │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
